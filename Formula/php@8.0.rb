@@ -1,10 +1,10 @@
-class PhpAT74 < Formula
+class PhpAT80 < Formula
   desc "General-purpose scripting language"
   homepage "https://www.php.net/"
   # Should only be updated if the new version is announced on the homepage, https://www.php.net/
-  url "https://www.php.net/distributions/php-7.4.28.tar.xz"
-  mirror "https://fossies.org/linux/www/php-7.4.28.tar.xz"
-  sha256 "9cc3b6f6217b60582f78566b3814532c4b71d517876c25013ae51811e65d8fce"
+  url "https://www.php.net/distributions/php-8.0.17.tar.xz"
+  mirror "https://fossies.org/linux/www/php-8.0.17.tar.xz"
+  sha256 "4e7d94bb3d144412cb8b2adeb599fb1c6c1d7b357b0d0d0478dc5ef53532ebc5"
   license "PHP-3.01"
 
   livecheck do
@@ -14,16 +14,15 @@ class PhpAT74 < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/shivammathur/php"
-    rebuild 1
-    sha256 arm64_big_sur: "cbfdd8e6d35f27635c287723ebdf3853915b0080f1359e89f53ec4d286d35ba2"
-    sha256 big_sur:       "4a4bac1eff27807a675c34f83be816557d21a55ff3946407ba1248c8cb3dee07"
-    sha256 catalina:      "e10c2a22cf48f6ec15f49ddc231a94800a8ef12c7ebd80193b2bfeb2523da3dd"
-    sha256 x86_64_linux:  "bf7f16d2aead190229b87a2efcf538b9f88e6e32cef5e3129d31b4c45caa60c8"
+    sha256 arm64_big_sur: "0a88709814357b220c56a2ba13f2408830bdbfb740aba32ac9ebec88c601792e"
+    sha256 big_sur:       "9421b1bc71a2b36445e936a8bb2ab5aab9e8326dd8dcea1f2004125ed83b49f8"
+    sha256 catalina:      "9e4e0e24983e5e9863da439713cb06f880a93b50fa929ae13d294ee60d6161e7"
+    sha256 x86_64_linux:  "329ae299a5b67a19f1d55d544b3133fb367cf2e88bcc3286b78ac528e799f458"
   end
 
   keg_only :versioned_formula
 
-  deprecate! date: "2022-11-28", because: :versioned_formula
+  deprecate! date: "2023-11-26", because: :versioned_formula
 
   depends_on "httpd" => [:build, :test]
   depends_on "pkg-config" => :build
@@ -39,7 +38,6 @@ class PhpAT74 < Formula
   depends_on "gmp"
   depends_on "icu4c"
   depends_on "krb5"
-  depends_on "libffi"
   depends_on "libpq"
   depends_on "libsodium"
   depends_on "libzip"
@@ -104,7 +102,7 @@ class PhpAT74 < Formula
     # Prevent system pear config from inhibiting pear install
     (config_path/"pear.conf").delete if (config_path/"pear.conf").exist?
 
-    # Prevent homebrew from hardcoding path to sed shim in phpize script
+    # Prevent homebrew from harcoding path to sed shim in phpize script
     ENV["lt_cv_path_SED"] = "sed"
 
     # system pkg-config missing
@@ -186,7 +184,6 @@ class PhpAT74 < Formula
       --with-sqlite3
       --with-tidy=#{Formula["tidy-html5"].opt_prefix}
       --with-unixODBC
-      --with-xmlrpc
       --with-xsl
       --with-zip
       --with-zlib
@@ -312,7 +309,7 @@ class PhpAT74 < Formula
   def caveats
     <<~EOS
       To enable PHP in Apache add the following to httpd.conf and restart Apache:
-          LoadModule php7_module #{opt_lib}/httpd/modules/libphp7.so
+          LoadModule php_module #{opt_lib}/httpd/modules/libphp.so
 
           <FilesMatch \\.php$>
               SetHandler application/x-httpd-php
@@ -374,16 +371,10 @@ class PhpAT74 < Formula
         DirectoryIndex index.php
       EOS
 
-      php_module = if head?
-        "LoadModule php_module #{lib}/httpd/modules/libphp.so"
-      else
-        "LoadModule php7_module #{lib}/httpd/modules/libphp7.so"
-      end
-
       (testpath/"httpd.conf").write <<~EOS
         #{main_config}
         LoadModule mpm_prefork_module lib/httpd/modules/mod_mpm_prefork.so
-        #{php_module}
+        LoadModule php_module #{lib}/httpd/modules/libphp.so
         <FilesMatch \\.(php|phar)$>
           SetHandler application/x-httpd-php
         </FilesMatch>
